@@ -1,0 +1,27 @@
+version: '3.1'
+
+services:
+    ozeranec-db:
+        image: postgres
+        restart: always
+        volumes:
+            - ./.data/db:/var/lib/postgresql/data
+        environment:
+            - postgres_db=postgres
+            - postgres_user=postgres
+            - POSTGRES_PASSWORD=superman
+        expose:
+            - "5432"
+    ozeranec-api:
+        image: docker.dulik.net/ozeranec-backend
+        restart: always
+        depends_on:
+            - proburese-db
+        ports:
+            - "3000:3000"
+        environment:
+            - DB_HOST=ozeranec-db
+            - DB_PORT=5432
+            - DB_USERNAME=postgres
+            - DB_PASSWORD=superman
+            - DB_NAME=postgres

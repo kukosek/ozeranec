@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ozeranec-backend
+  labels:
+    app: ozeranec-backend
+  annotations:
+    keel.sh/policy: all
+    keel.sh/trigger: poll
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ozeranec-backend
+  template:
+    metadata:
+      labels:
+        app: ozeranec-backend
+    spec:
+      imagePullSecrets:
+      - name: registrypullsecret
+      containers:
+      - name: ozeranec-backend
+        image: docker.dulik.net/ozeranec-backend:latest
+        env:
+        - name: DB_HOST
+          value: "ozepetice.pgo"
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_USERNAME
+          value: "testuser"
+        - name: DB_PASSWORD
+          value: "password"
+        - name: DB_NAME
+          value: "ozepetice"
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: ozeranec-backend
+spec:
+  selector:
+    app: ozeranec-backend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ozeranec-frontend
+  labels:
+    app: ozeranec-frontend
+  annotations:
+    keel.sh/policy: all
+    keel.sh/trigger: poll
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ozeranec-frontend
+  template:
+    metadata:
+      labels:
+        app: ozeranec-frontend
+    spec:
+      imagePullSecrets:
+      - name: registrypullsecret
+      containers:
+      - name: ozeranec-frontend
+        image: docker.dulik.net/ozeranec-frontend:latest
+        env:
+        - name: API_ENDPOINT
+          value: "https://ozeranec/api"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ozeranec-frontend
+spec:
+  selector:
+    app: ozeranec-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
